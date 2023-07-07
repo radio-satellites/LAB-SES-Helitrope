@@ -24,6 +24,9 @@ UDP_PORT = 514
 
 connected_rtl433 = True
 
+def int_to_bytes(x: int) -> bytes:
+    return x.to_bytes((x.bit_length() + 7) // 8, 'big')
+
 
 try:
     sock = socket.socket(socket.AF_INET, # Internet
@@ -37,7 +40,38 @@ try:
 except:
     print("ERROR: CANNOT CONNECT TO RTL-433 PACKET MODEM")
 
+try:
+    g = geocoder.ip('me')
+    fake_var = g.latlng
+    location_works = True #Otherwise will fail
+    print("Location found")
+except:
+    print("ERROR: CANNOT GET LOCATION")
+
+
+
 print("CONNECTED TO RTL-433!")
+
+counter_packet = 0
+
+f_config = open("config.txt",'r').read().split("\n")[2].split(",")
+
+#init server side stuff
+satnogs.init("LABSES",42732,0,0)
+
+uploader = Uploader(
+    f_config[0], #callsign
+    uploader_position=[fake_var[0], fake_var[1], 100], # [latitude, longitude, altitude]
+    uploader_radio=f_config[2], # Radio information - Optional
+    uploader_antenna=f_config[3] # Antenna information - Optional
+)
+
+uploader.upload_station_position(
+    f_config[0], #callsign
+    [fake_var[0], fake_var[1], 100], # [latitude, longitude, altitude]
+    uploader_radio=f_config[2], # Radio information - Optional
+    uploader_antenna=f_config[3] # Antenna information - Optional
+)
 
 while True:
     if connected_rtl433:
@@ -63,10 +97,12 @@ while True:
 
             try:
                         
-                    pressure,altitude,temperature,latitude,longitude,frame_num = parser.parse_string(packet)
+                    latitude,longitude,altitude = parser.parse_shortform(char_string)
                     #form server side packet
-                    server_packet = "00444,"+str(pressure)+","+str(altitude)+","+str(temperature)+","+str(latitude)+","+str(longitude)+","+str(frame_num)
-                    f.write(server_packet)
+                    server_packet = "00555,"+str(altitude)+","+str(latitude)+","+str(longitude)
+                    pressure = 0
+                    temperature = 0
+                    frame_num = 0
                     #print(server_packet)
                     satnogs.send_sids(server_packet)
                     counter_packet = counter_packet+1
@@ -124,12 +160,11 @@ while True:
                         print("----------------------")
                         print("==============================================================")
                         print("\n")
-            except:
-                print("Cannot parse RTL-433 packet",char_string)
+            except Exception as e:
+                print("Cannot parse RTL-433 packet",char_string,e)
             
             
             char_string = ""
         except Exception as e:
             #print(e)
             pass
-
