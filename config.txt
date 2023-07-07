@@ -1,0 +1,3 @@
+#Config
+#Callsign, spacecraft callsign to track, receiver details, antenna details
+VE3SVF,LAB-SES-1,RTL-SDR,7el yagi
