@@ -44,6 +44,31 @@ def parse_string(string):
         return pressure,altitude,temperature,latitude,longitude,frame_num
     else:
         return 0
-        
-    
 
+def parse_shortform(data):
+    parameters = data.split("?")
+    num_correct = 0
+    try:
+        latitude = float(parameters[0])/1000000
+        if latitude > 20 and latitude < 100:
+            num_correct = num_correct+1
+        else:
+            latitude = 0
+            
+    except:
+        latitude = 0
+    try:
+        longitude = float(parameters[1])/-1000000
+        if longitude < -10 and longitude > -100:
+            num_correct = num_correct+1
+        else:
+            longitude = 0
+    except:
+        longitude = 0
+    try:
+        altitude = float(parameters[2])
+        num_correct = num_correct+1
+    except:
+        altitude = 0
+
+    return latitude,longitude,altitude
