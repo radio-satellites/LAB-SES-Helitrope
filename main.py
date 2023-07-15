@@ -9,6 +9,7 @@ import geocoder
 import earthmath
 import postsids as satnogs
 from sondehubtools.amateur import Uploader
+import correlate as c
 
 print("LAB SES 1 MISSION TELEMETRY DECODER/DASHBOARD")
 time.sleep(0.5)
@@ -100,7 +101,12 @@ while True:
          #print(message)
          if _char == "\n":
              try:
-                    
+
+                # figure out syncword location
+                start = c.find_sync("AAAA",str(packet))
+                end = c.find_sync("111",str(packet))
+                packet = packet[start:end+3]
+                #print(packet) #debug
                 pressure,altitude,temperature,latitude,longitude,frame_num = parser.parse_string(packet)
                 #form server side packet
                 server_packet = "00444,"+str(pressure)+","+str(altitude)+","+str(temperature)+","+str(latitude)+","+str(longitude)+","+str(frame_num)

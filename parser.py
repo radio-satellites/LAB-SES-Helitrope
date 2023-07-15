@@ -1,14 +1,22 @@
+#example_string = "$$,99900,12100,2300,43669380,79521368" #test string
+
 def parse_string(string):
     parameters = string.split(",")
     num_correct = 0
     try:
         pressure = float(parameters[1]) #Recover the data back
-        num_correct = num_correct+1
+        if pressure > 0 and pressure < 20000:
+            num_correct = num_correct+1
+        else:
+            pressure = 0
     except:
         pressure = 0
     try:
         altitude = float(parameters[2])
-        num_correct = num_correct+1
+        if altitude > 0 and altitude < 40000:
+            num_correct = num_correct+1
+        else:
+            altitude = 0
     except:
         altitude = 0
     try:
